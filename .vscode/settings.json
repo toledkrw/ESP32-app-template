@@ -1,0 +1,6 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  // "idf.portWin": "COM3",
+  "idf.pythonInstallPath": "d:\\Programas\\DEV\\DEV_PATH\\ESP-32\\_tools\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.port": "/dev/ttyUSB0"
+}
