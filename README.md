@@ -1,191 +1,191 @@
 # ESP32 Project Setup with Docker and Devcontainers
 
-## Índice
-1. [Introdução](#1-introdução)
-2. [Pré-requisitos](#2-pré-requisitos)
-    - [Instalação de drivers ESP32](#instalação-de-drivers-esp32)
-3. [Configurando o Ambiente](#3-configurando-o-ambiente)
+## Table of Contents
+1. [Introduction](#1-introduction)
+2. [Prerequisites](#2-prerequisites)
+    - [ESP32 Driver Installation](#esp32-driver-installation)
+3. [Setting Up the Environment](#3-setting-up-the-environment)
     - [WSL (Windows Subsystem for Linux)](#wsl)
     - [Docker](#docker)
     - [VSCode](#vscode)
-        - [Extensão ESP-IDF](#-esp-idf-extension)
-        - [Extensão Dev Containers](#-devcontainers-extension)
-4. [Encaminhamento de USB](#4-encaminhamento-de-usb)
-    - [Windows para WSL](#windows-para-wsl)
-    - [WSL para Container Docker](#wsl-para-container-docker)
-    - [Desfazendo o Encaminhamento de USB](#desfazendo-o-encaminhamento-de-usb)
-5. [Clonando o Projeto](#5-clonando-o-projeto)
-6. [Estrutura do Projeto](#6-estrutura-do-projeto)
-7. [Build e Deploy](#7-build-e-deploy)
-8. [Dicas e Solução de Problemas](#8-dicas-e-solução-de-problemas)
-9. [Referências](#9-referências)
+        - [ESP-IDF Extension](#-esp-idf-extension)
+        - [Dev Containers Extension](#-devcontainers-extension)
+4. [USB Forwarding](#4-usb-forwarding)
+    - [Windows to WSL](#windows-to-wsl)
+    - [WSL to Docker Container](#wsl-to-docker-container)
+    - [Undoing USB Forwarding](#undoing-usb-forwarding)
+5. [Cloning the Project](#5-cloning-the-project)
+6. [Project Structure](#6-project-structure)
+7. [Build and Deploy](#7-build-and-deploy)
+8. [Tips and Troubleshooting](#8-tips-and-troubleshooting)
+9. [References](#9-references)
 
 ---
 
-## 1. Introdução
-Este guia tem como objetivo detalhar o processo de configuração de um ambiente de desenvolvimento moderno e reprodutível para projetos com ESP32, utilizando ferramentas como Docker, Devcontainers e WSL. Ao invés de focar em um projeto específico, o foco está em padronizar e simplificar a preparação do ambiente, tornando mais fácil para qualquer desenvolvedor iniciar, colaborar e manter projetos ESP32, independentemente do sistema operacional utilizado. Aqui você encontrará instruções passo a passo para instalar drivers, configurar o WSL, Docker, VSCode e extensões essenciais, além de dicas para forwarding de USB e solução de problemas comuns.
+## 1. Introduction
+This guide aims to detail the process of setting up a modern and reproducible development environment for ESP32 projects using tools like Docker, Devcontainers, and WSL. Instead of focusing on a specific project, the goal is to standardize and simplify environment preparation, making it easier for any developer to start, collaborate, and maintain ESP32 projects regardless of the operating system used. Here you will find step-by-step instructions for installing drivers, configuring WSL, Docker, VSCode, and essential extensions, as well as tips for USB forwarding and troubleshooting common issues.
 
-## 2. Pré-requisitos
-- Conhecimento básico de elétrica e eletrônica
-- Conhecimento de programação
+## 2. Prerequisites
+- Basic knowledge of electrical and electronics
+- Programming knowledge
     - C & C++
     - Shell
     - Python
 - ESP32
-- A KOMPIUTAR 🖥️
-- Cabo USB
-- Conexão com a Internet
+- A COMPUTER 🖥️
+- USB cable
+- Internet connection
 
-### Instalação de drivers ESP32
-Para que o ESP32 seja reconhecido corretamente pelo seu computador, pode ser necessário instalar o driver USB para UART, especialmente em placas baseadas no chip CP210x (Silicon Labs).
+### ESP32 Driver Installation
+For your computer to correctly recognize the ESP32, you may need to install the USB to UART driver, especially for boards based on the CP210x (Silicon Labs) chip.
 
 ### Windows
-1. **Identifique o dispositivo:**  
-    Ao conectar o ESP32, se ele não for reconhecido, aparecerá no Gerenciador de Dispositivos como `CPxxxx USB to UART Bridge Controller` (por exemplo, `CP2102 USB to UART Bridge Controller`).
-2. **Baixe o driver:**  
-    Acesse o site oficial da Silicon Labs:  
+1. **Identify the device:**  
+    When connecting the ESP32, if it is not recognized, it will appear in Device Manager as `CPxxxx USB to UART Bridge Controller` (e.g., `CP2102 USB to UART Bridge Controller`).
+2. **Download the driver:**  
+    Go to the official Silicon Labs website:  
     [https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads)
-3. **Instale o driver:**  
-    - Baixe o instalador correspondente ao seu sistema operacional (Windows 10/11, 64 ou 32 bits).
-    - Execute o instalador e siga as instruções na tela.
-4. **Atualize o driver manualmente (se necessário):**  
-    - No Gerenciador de Dispositivos, clique com o botão direito no dispositivo `CPxxxx USB to UART Bridge Controller` e selecione **Atualizar driver**.
-    - Escolha **Procurar software de driver no computador** e aponte para a pasta onde o driver foi extraído/instalado.
-5. **Verifique a instalação:**  
-    Após a instalação, o dispositivo deve aparecer como uma porta COM (por exemplo, `COM3`) e estar pronto para uso.
+3. **Install the driver:**  
+    - Download the installer for your operating system (Windows 10/11, 64 or 32 bits).
+    - Run the installer and follow the on-screen instructions.
+4. **Manually update the driver (if necessary):**  
+    - In Device Manager, right-click the `CPxxxx USB to UART Bridge Controller` device and select **Update driver**.
+    - Choose **Browse my computer for drivers** and point to the folder where the driver was extracted/installed.
+5. **Verify the installation:**  
+    After installation, the device should appear as a COM port (e.g., `COM3`) and be ready for use.
 
 ### Linux
-Na maioria das distribuições Linux modernas, o driver para CP210x já está incluído no kernel. Para verificar:
+On most modern Linux distributions, the CP210x driver is already included in the kernel. To check:
 
-1. **Conecte o ESP32 via USB.**
-2. **Verifique se o dispositivo foi reconhecido:**  
-    Execute no terminal:
+1. **Connect the ESP32 via USB.**
+2. **Check if the device was recognized:**  
+    Run in the terminal:
     ```bash
     dmesg | grep tty
     ```
-    Procure por algo como `/dev/ttyUSB0` ou `/dev/ttyACM0`.
-3. **Se não for reconhecido:**  
-    - Certifique-se de que o módulo está carregado:
+    Look for something like `/dev/ttyUSB0` or `/dev/ttyACM0`.
+3. **If not recognized:**  
+    - Make sure the module is loaded:
       ```bash
       lsmod | grep cp210x
       ```
-    - Caso não esteja, carregue manualmente:
+    - If not, load it manually:
       ```bash
       sudo modprobe cp210x
       ```
-    - Se ainda assim não funcionar, verifique se seu usuário pertence ao grupo `dialout`:
+    - If it still doesn't work, check if your user belongs to the `dialout` group:
       ```bash
       sudo usermod -aG dialout $USER
       ```
-      Depois, reinicie a sessão.
-4. **Referência:**  
-    [Drivers Silicon Labs - Documentação](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
+      Then, restart your session.
+4. **Reference:**  
+    [Silicon Labs Drivers - Documentation](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
 
-Com o driver instalado, o ESP32 estará pronto para comunicação serial tanto no Windows quanto no Linux.
+With the driver installed, the ESP32 will be ready for serial communication on both Windows and Linux.
 
 
-## 3. Configurando o Ambiente
+## 3. Setting Up the Environment
 
 ### WSL
-Para instalar o WSL (Windows Subsystem for Linux) manualmente, siga os passos abaixo:
+To manually install WSL (Windows Subsystem for Linux), follow the steps below:
 
-1. **Habilite o recurso WSL:**
-    Abra o PowerShell como administrador e execute:
+1. **Enable the WSL feature:**
+    Open PowerShell as administrator and run:
     ```powershell
     dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
     ```
-2. **Habilite a Máquina Virtual:**
-    Ainda no PowerShell, execute:
+2. **Enable the Virtual Machine Platform:**
+    Still in PowerShell, run:
     ```powershell
     dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
     ```
-3. **Reinicie o computador.**
-4. **Instale o kernel do WSL:**
-    Baixe e execute o instalador do kernel atualizado em:  
+3. **Restart your computer.**
+4. **Install the WSL kernel:**
+    Download and run the updated kernel installer at:  
     [https://aka.ms/wsl2kernel](https://aka.ms/wsl2kernel)
-5. **Defina o WSL 2 como padrão (opcional, mas recomendado):**
-    No PowerShell, execute:
+5. **Set WSL 2 as default (optional but recommended):**
+    In PowerShell, run:
     ```powershell
     wsl --set-default-version 2
     ```
-6. **Instale uma distribuição Linux:**
-    Acesse a Microsoft Store, pesquise por "Ubuntu" (ou outra distribuição de sua preferência) e instale.
-7. **Configure a distribuição:**
-    Após a instalação, abra a distribuição pelo menu iniciar e siga as instruções para criar um usuário e senha.
+6. **Install a Linux distribution:**
+    Go to the Microsoft Store, search for "Ubuntu" (or another distribution of your choice), and install it.
+7. **Set up the distribution:**
+    After installation, open the distribution from the start menu and follow the instructions to create a user and password.
 
-**Referência:**  
-[Guia oficial de instalação manual do WSL](https://learn.microsoft.com/pt-br/windows/wsl/install-manual)
+**Reference:**  
+[Official WSL Manual Installation Guide](https://learn.microsoft.com/en-us/windows/wsl/install-manual)
 
 ### Docker
-Para instalar o Docker, siga os passos abaixo conforme seu sistema operacional:
+To install Docker, follow the steps below according to your operating system:
 
 #### Windows
-1. **Acesse o site oficial:**  
+1. **Go to the official website:**  
     [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
-2. **Baixe o instalador do Docker Desktop.**
-3. **Execute o instalador:**  
-    Siga as instruções na tela para concluir a instalação.
-4. **Reinicie o computador se solicitado.**
-5. **Verifique a instalação:**  
-    Abra o terminal (cmd, PowerShell ou WSL) e execute:
+2. **Download the Docker Desktop installer.**
+3. **Run the installer:**  
+    Follow the on-screen instructions to complete the installation.
+4. **Restart your computer if prompted.**
+5. **Verify the installation:**  
+    Open the terminal (cmd, PowerShell, or WSL) and run:
     ```bash
     docker --version
     ```
-    O comando deve retornar a versão instalada do Docker.
+    The command should return the installed Docker version.
 
 #### Linux (Ubuntu)
-1. **Atualize os pacotes:**
+1. **Update packages:**
     ```bash
     sudo apt update
     ```
-2. **Instale dependências:**
+2. **Install dependencies:**
     ```bash
     sudo apt install apt-transport-https ca-certificates curl software-properties-common
     ```
-3. **Adicione o repositório oficial do Docker:**
+3. **Add the official Docker repository:**
     ```bash
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     ```
-4. **Instale o Docker:**
+4. **Install Docker:**
     ```bash
     sudo apt update
     sudo apt install docker-ce
     ```
-5. **Verifique a instalação:**
+5. **Verify the installation:**
     ```bash
     docker --version
     ```
-6. **(Opcional) Adicione seu usuário ao grupo docker:**
+6. **(Optional) Add your user to the docker group:**
     ```bash
     sudo usermod -aG docker $USER
     ```
-    Depois, reinicie a sessão para aplicar a alteração.
+    Then, restart your session to apply the change.
 
 #### macOS
-1. **Acesse o site oficial:**  
+1. **Go to the official website:**  
     [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
-2. **Baixe o instalador do Docker Desktop para Mac.**
-3. **Abra o arquivo .dmg e arraste o Docker para a pasta Aplicativos.**
-4. **Abra o Docker Desktop e siga as instruções de configuração.**
-5. **Verifique a instalação no terminal:**
+2. **Download the Docker Desktop installer for Mac.**
+3. **Open the .dmg file and drag Docker to the Applications folder.**
+4. **Open Docker Desktop and follow the setup instructions.**
+5. **Verify the installation in the terminal:**
     ```bash
     docker --version
     ```
 
-**Referência:**  
-[Documentação oficial do Docker](https://docs.docker.com/get-docker/)
+**Reference:**  
+[Official Docker Documentation](https://docs.docker.com/get-docker/)
 
 ### VSCode
-Para instalar o Visual Studio Code (VSCode), siga os passos abaixo:
+To install Visual Studio Code (VSCode), follow the steps below:
 
-1. **Acesse o site oficial:**  
+1. **Go to the official website:**  
     [https://code.visualstudio.com/](https://code.visualstudio.com/)
-2. **Baixe o instalador:**  
-    Escolha a versão adequada para o seu sistema operacional (Windows, macOS ou Linux).
-3. **Execute o instalador:**  
-    Siga as instruções na tela para concluir a instalação.
-4. **(Opcional) Instale o VSCode via linha de comando:**  
+2. **Download the installer:**  
+    Choose the appropriate version for your operating system (Windows, macOS, or Linux).
+3. **Run the installer:**  
+    Follow the on-screen instructions to complete the installation.
+4. **(Optional) Install VSCode via command line:**  
     - **Windows:**  
       ```powershell
       winget install Microsoft.VisualStudioCode
@@ -194,142 +194,142 @@ Para instalar o Visual Studio Code (VSCode), siga os passos abaixo:
       ```bash
       sudo snap install --classic code
       ```
-5. **Verifique a instalação:**  
-    Abra o VSCode e confirme que está funcionando corretamente.
+5. **Verify the installation:**  
+    Open VSCode and confirm it is working correctly.
 
-Recomenda-se instalar também a extensão "Remote - Containers" para trabalhar com Devcontainers.
+It is recommended to also install the "Remote - Containers" extension to work with Devcontainers.
 
 #### - ESP-IDF Extension
-Para instalar a extensão ESP-IDF no VSCode, siga os passos abaixo:
+To install the ESP-IDF extension in VSCode, follow these steps:
 
-1. **Abra o VSCode.**
-2. **Acesse a aba de extensões:** Clique no ícone de extensões na barra lateral esquerda ou pressione `Ctrl+Shift+X`.
-3. **Pesquise por "ESP-IDF":** No campo de busca, digite `ESP-IDF`. Ou use o link direto: [https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)
-4. **Selecione a extensão "Espressif IDF":** Clique sobre a extensão desenvolvida pela Espressif Systems.
-5. **Clique em "Instalar".**
+1. **Open VSCode.**
+2. **Go to the extensions tab:** Click the extensions icon in the left sidebar or press `Ctrl+Shift+X`.
+3. **Search for "ESP-IDF":** In the search field, type `ESP-IDF`. Or use the direct link: [https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)
+4. **Select the "Espressif IDF" extension:** Click on the extension developed by Espressif Systems.
+5. **Click "Install".**
 
-Após a instalação, siga as instruções exibidas para configurar o ambiente ESP-IDF, incluindo a instalação de dependências e configuração do Python, caso necessário.
+After installation, follow the instructions shown to set up the ESP-IDF environment, including installing dependencies and configuring Python if necessary.
 
-Essa extensão facilita o desenvolvimento, build, flash e debug de projetos ESP32 diretamente pelo VSCode.
-Você precisará instalar em um "sys path" a versão do IDF que utilizará, porém, no desenvolvimento através de um devcontainer, isso será feito automaticamente.
+This extension makes it easier to develop, build, flash, and debug ESP32 projects directly from VSCode.
+You will need to install the IDF version you will use in a "sys path", but when developing through a devcontainer, this will be done automatically.
 
 
-#### - Devcontainers Extension
-Para instalar a extensão "Dev Containers" no VSCode, siga os passos abaixo:
+#### - Dev Containers Extension
+To install the "Dev Containers" extension in VSCode, follow these steps:
 
-1. **Abra o VSCode.**
-2. **Acesse a aba de extensões:** Clique no ícone de extensões na barra lateral esquerda ou pressione `Ctrl+Shift+X`.
-3. **Pesquise por "Dev Containers":** No campo de busca, digite `Dev Containers`. Ou utilize o link direto: [https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-4. **Selecione a extensão "Dev Containers" (Microsoft):** Clique sobre a extensão desenvolvida pela Microsoft.
-5. **Clique em "Instalar".**
+1. **Open VSCode.**
+2. **Go to the extensions tab:** Click the extensions icon in the left sidebar or press `Ctrl+Shift+X`.
+3. **Search for "Dev Containers":** In the search field, type `Dev Containers`. Or use the direct link: [https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+4. **Select the "Dev Containers" extension (Microsoft):** Click on the extension developed by Microsoft.
+5. **Click "Install".**
 
-Após a instalação, você poderá abrir pastas ou projetos dentro de containers de desenvolvimento, facilitando a configuração de ambientes isolados e reprodutíveis para o seu projeto ESP32.
+After installation, you will be able to open folders or projects inside development containers, making it easier to set up isolated and reproducible environments for your ESP32 project.
 
-## 4. Encaminhamento de USB
+## 4. USB Forwarding
 
-### Windows para WSL
-Para que o ESP32 conectado via USB seja acessível dentro do WSL, é necessário realizar o "bind" do dispositivo usando o utilitário `usbipd`. Siga os passos abaixo:
+### Windows to WSL
+For the ESP32 connected via USB to be accessible inside WSL, you need to "bind" the device using the `usbipd` utility. Follow the steps below:
 
-> Antes de listar os dispositivos, instale o utilitário `usbipd` no Windows, caso ainda não tenha feito isso. Execute no PowerShell:
+> Before listing devices, install the `usbipd` utility on Windows if you haven't already. Run in PowerShell:
 > ```powershell
 > winget install usbipd
 > ```
-1. **Liste os dispositivos USB disponíveis no Windows:**
-    No PowerShell (fora do WSL), execute:
+1. **List available USB devices in Windows:**
+    In PowerShell (outside WSL), run:
     ```powershell
     usbipd list
     ```
-    Procure pelo dispositivo correspondente ao ESP32 (geralmente identificado como "CP210x" ou "Silicon Labs").
-2. **Anote o BUSID e VID:PID do dispositivo** 
-    Exemplo: `1-3` e `A0B1:0A1B`).
-3. **Anexe o dispositivo ao WSL:**
-    Ainda no PowerShell, execute:
+    Look for the device corresponding to the ESP32 (usually identified as "CP210x" or "Silicon Labs").
+2. **Note the BUSID and VID:PID of the device**  
+    Example: `1-3` and `A0B1:0A1B`).
+3. **Attach the device to WSL:**
+    Still in PowerShell, run:
     ```powershell
     usbipd attach --busid <ID> --wsl
     ```
-    Substitua `<ID>` pelo identificador anotado anteriormente.
-4. **Verifique no WSL:**
-    No terminal do WSL, execute e verifique se o dispositivo aparece como um USB tendo a mensagem:
+    Replace `<ID>` with the identifier noted earlier.
+4. **Check in WSL:**
+    In the WSL terminal, run and check if the device appears as a USB with the message:
     ```bash
     dmesg | tail -n 10
     "usb 1-1: cp210x converter now attached to ttyUSB0"
     ```
-5. **Atribua o driver manualmente, se necessário**
-    Caso não tenha a mensagem anterior ou sequer tenha algum dispositivo ```ttyUSB```:
+5. **Manually assign the driver if necessary**
+    If you don't see the previous message or don't have any ```ttyUSB``` device:
     ```bash
     ls /dev/ttyUSB*
     ```
-    Você precisará atribuir o driver manualmente ao dispositivo, e então monta-lo em um nó USB. Lembre-se do seu "VID:PID" e substitua-os no comando à seguir:
+    You will need to manually assign the driver to the device, then mount it to a USB node. Remember your "VID:PID" and replace them in the following command:
     ```bash
     modprobe cp210x
     echo <VID> <PID> | sudo tee /sys/bus/usb-serial/drivers/cp210x/new_id
     ```
-    Confira novamente se o dispositivo foi montado em algum ```ttyUSB```:
+    Check again if the device was mounted to a ```ttyUSB```:
     ```bash
     dmesg | tail -n 10
     "usb 1-1: cp210x converter now attached to ttyUSB0"
     ```    
 
-**Referência:**  
-[Conectar dispositivos USB ao WSL - Documentação Microsoft](https://learn.microsoft.com/pt-br/windows/wsl/connect-usb#attach-a-usb-device)
+**Reference:**  
+[Connect USB devices to WSL - Microsoft Documentation](https://learn.microsoft.com/en-us/windows/wsl/connect-usb#attach-a-usb-device)
 
 
-### WSL para Container Docker
-Quando você utiliza o `usbipd` para fazer o bind do dispositivo USB à sua instância WSL (por exemplo, `Ubuntu` ou `docker-desktop`), o dispositivo USB se torna visível para o kernel do WSL. Como o Docker Desktop para Windows executa containers Linux dentro do WSL 2, os containers podem acessar dispositivos USB expostos pelo WSL, desde que o dispositivo seja explicitamente mapeado para o container usando a opção `--device` no `devcontainer.json`. Ou seja, o forwarding feito pelo `usbipd` torna o dispositivo disponível para o WSL, mas cada container ainda precisa receber permissão para acessar o dispositivo (por exemplo, `/dev/ttyUSB0`) via configuração no `devcontainer.json`. Não é necessário configurar drivers adicionais dentro do container se o dispositivo já estiver funcional no WSL, mas o mapeamento do device é obrigatório para acesso pelo container.
+### WSL to Docker Container
+When you use `usbipd` to bind the USB device to your WSL instance (e.g., `Ubuntu` or `docker-desktop`), the USB device becomes visible to the WSL kernel. Since Docker Desktop for Windows runs Linux containers inside WSL 2, containers can access USB devices exposed by WSL, as long as the device is explicitly mapped to the container using the `--device` option in `devcontainer.json`. That is, the forwarding done by `usbipd` makes the device available to WSL, but each container still needs permission to access the device (e.g., `/dev/ttyUSB0`) via configuration in `devcontainer.json`. No additional drivers are needed inside the container if the device is already functional in WSL, but device mapping is mandatory for container access.
 ```json
 "runArgs": [
-		"--device=/dev/ttyUSB0:/dev/ttyUSB0",
-		"--privileged"
-	]
+        "--device=/dev/ttyUSB0:/dev/ttyUSB0",
+        "--privileged"
+    ]
 ```
 
-### Desfazendo o Encaminhamento de USB
+### Undoing USB Forwarding
 
-Para desfazer o encaminhamento (forwarding) de um dispositivo USB conectado ao WSL, utilize o comando:
+To undo the forwarding of a USB device connected to WSL, use the command:
 ```powershell
 usbipd detach --busid <ID>
 ```
-O parâmetro `<ID>` deve ser substituído pelo identificador do barramento USB do dispositivo que foi previamente encaminhado.
-Esse comando desconecta o dispositivo USB do ambiente WSL, tornando-o novamente disponível para o Windows ou outros sistemas.
+Replace `<ID>` with the USB bus identifier of the device that was previously forwarded.
+This command disconnects the USB device from the WSL environment, making it available again to Windows or other systems.
 
-> Atente-se que possívelmente será necessário realizar o processo de encaminhamento USB e montagem de nó caso troque seu dispositivo de porta USB, uma vez que seu ```BUSID``` irá mudar.
+> Note that you may need to repeat the USB forwarding and node mounting process if you change your device's USB port, as its ```BUSID``` will change.
 
-## 5. Clonando o Projeto
+## 5. Cloning the Project
 <!-- TODO -->
 
-## 6. Estrutura do Projeto
-A estrutura deste projeto é simples e segue o padrão recomendado para projetos ESP32 com CMake:
+## 6. Project Structure
+The structure of this project is simple and follows the recommended pattern for ESP32 projects with CMake:
 
 ```
-├── CMakeLists.txt           # Arquivo principal de configuração do CMake para o projeto
+├── CMakeLists.txt           # Main CMake configuration file for the project
 ├── main
-│   ├── CMakeLists.txt       # Configuração específica do CMake para o código-fonte principal
-│   └── main.c               # Código-fonte principal da aplicação
-└── README.md                # Este arquivo de documentação
+│   ├── CMakeLists.txt       # CMake configuration specific to the main source code
+│   └── main.c               # Main application source code
+└── README.md                # This documentation file
 ```
 
-- **CMakeLists.txt**: Arquivo de configuração do CMake na raiz, responsável por definir as regras de build do projeto.
-- **main/**: Diretório que contém o código-fonte principal da aplicação, incluindo seu próprio CMakeLists.txt e o arquivo `main.c`.
-- **README.md**: Documentação do projeto, com instruções de uso, configuração e informações relevantes.
+- **CMakeLists.txt**: Root CMake configuration file, responsible for defining the project's build rules.
+- **main/**: Directory containing the main application source code, including its own CMakeLists.txt and the `main.c` file.
+- **README.md**: Project documentation, with usage instructions, configuration, and relevant information.
 
-Essa organização facilita a manutenção, a escalabilidade e o entendimento do projeto, seguindo as boas práticas para projetos ESP32 baseados em CMake.
+This organization makes the project easier to maintain, scale, and understand, following best practices for CMake-based ESP32 projects.
 
-## 7. Build e Deploy
+## 7. Build and Deploy
 <!-- TODO -->
 
-## 8. Dicas e Solução de Problemas
+## 8. Tips and Troubleshooting
 <!-- TODO -->
 
-## 9. Referências
+## 9. References
 
-- [Documentação oficial do ESP-IDF](https://docs.espressif.com/projects/esp-idf/pt/latest/)
-- [Guia de instalação manual do WSL (Microsoft)](https://learn.microsoft.com/pt-br/windows/wsl/install-manual)
-- [Conectar dispositivos USB ao WSL (Microsoft)](https://learn.microsoft.com/pt-br/windows/wsl/connect-usb)
-- [Drivers USB to UART Bridge (Silicon Labs)](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads)
-- [Documentação oficial do Docker](https://docs.docker.com/get-docker/)
-- [Visual Studio Code - Site oficial](https://code.visualstudio.com/)
-- [Extensão ESP-IDF para VSCode](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)
-- [Extensão Dev Containers para VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- [Repositório Awesome ESP32 (recursos e projetos)](https://github.com/agucova/awesome-esp32)
-- [Comunidade ESP32 no GitHub](https://github.com/espressif/esp-idf)
-- [Docker Desktop para Windows/macOS](https://www.docker.com/products/docker-desktop/)
+- [Official ESP-IDF Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/)
+- [Manual WSL Installation Guide (Microsoft)](https://learn.microsoft.com/en-us/windows/wsl/install-manual)
+- [Connect USB devices to WSL (Microsoft)](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
+- [USB to UART Bridge Drivers (Silicon Labs)](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads)
+- [Official Docker Documentation](https://docs.docker.com/get-docker/)
+- [Visual Studio Code - Official Site](https://code.visualstudio.com/)
+- [ESP-IDF Extension for VSCode](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)
+- [Dev Containers Extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [Awesome ESP32 Repository (resources and projects)](https://github.com/agucova/awesome-esp32)
+- [ESP32 Community on GitHub](https://github.com/espressif/esp-idf)
+- [Docker Desktop for Windows/macOS](https://www.docker.com/products/docker-desktop/)
