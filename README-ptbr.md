@@ -162,17 +162,6 @@ Para instalar o Docker, siga os passos abaixo conforme seu sistema operacional:
     ```
     Depois, reinicie a sessão para aplicar a alteração.
 
-#### macOS
-1. **Acesse o site oficial:**  
-    [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
-2. **Baixe o instalador do Docker Desktop para Mac.**
-3. **Abra o arquivo .dmg e arraste o Docker para a pasta Aplicativos.**
-4. **Abra o Docker Desktop e siga as instruções de configuração.**
-5. **Verifique a instalação no terminal:**
-    ```bash
-    docker --version
-    ```
-
 **Referência:**  
 [Documentação oficial do Docker](https://docs.docker.com/get-docker/)
 
@@ -182,7 +171,7 @@ Para instalar o Visual Studio Code (VSCode), siga os passos abaixo:
 1. **Acesse o site oficial:**  
     [https://code.visualstudio.com/](https://code.visualstudio.com/)
 2. **Baixe o instalador:**  
-    Escolha a versão adequada para o seu sistema operacional (Windows, macOS ou Linux).
+    Escolha a versão adequada para o seu sistema operacional (Windows ou Linux).
 3. **Execute o instalador:**  
     Siga as instruções na tela para concluir a instalação.
 4. **(Opcional) Instale o VSCode via linha de comando:**  
@@ -332,4 +321,4 @@ Essa organização facilita a manutenção, a escalabilidade e o entendimento do
 - [Extensão Dev Containers para VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 - [Repositório Awesome ESP32 (recursos e projetos)](https://github.com/agucova/awesome-esp32)
 - [Comunidade ESP32 no GitHub](https://github.com/espressif/esp-idf)
-- [Docker Desktop para Windows/macOS](https://www.docker.com/products/docker-desktop/)
+- [Docker Desktop para Windows](https://www.docker.com/products/docker-desktop/)
